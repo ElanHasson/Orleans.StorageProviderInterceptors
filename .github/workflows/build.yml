@@ -69,7 +69,7 @@ jobs:
         with:
           name: NuGets
       - name: "Dotnet NuGet Add Source"
-        run: dotnet nuget add source https://nuget.pkg.github.com/ElanHasson/index.json --name GitHub --username ElanHasson --password ${{secrets.GH_TOKEN}}
+        run: dotnet nuget add source https://nuget.pkg.github.com/ElanHasson/index.json --name GitHub --username ElanHasson --password ${{secrets.GITHUB_TOKEN}}
         shell: pwsh
       - name: "Dotnet NuGet Push"
         run: dotnet nuget push .\*.nupkg --api-key ${{ github.token }} --source GitHub --skip-duplicate
