@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Build">
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <Product>Orleans.StorageProviderInterceptors</Product>
+    <Description>An interceptor library for Orleans Storage Providers allowing to intercept storage provider operations for transparent encryption, model state validation, and even select a different storage provider at runtime..Project Description</Description>
+    <PackageTags>orleans;storage provider</PackageTags>
+  </PropertyGroup>
+
+</Project>
