@@ -1,5 +1,3 @@
-![Banner](Images/Banner.png)
-
 # Orleans.StorageProviderInterceptors
 
 [![Orleans.StorageProviderInterceptors NuGet Package](https://img.shields.io/nuget/v/Orleans.StorageProviderInterceptors.svg)](https://www.nuget.org/packages/Orleans.StorageProviderInterceptors/) [![Orleans.StorageProviderInterceptors NuGet Package Downloads](https://img.shields.io/nuget/dt/Orleans.StorageProviderInterceptors)](https://www.nuget.org/packages/Orleans.StorageProviderInterceptors) [![GitHub Actions Status](https://github.com/ElanHasson/Orleans.StorageProviderInterceptors/workflows/Build/badge.svg?branch=main)](https://github.com/ElanHasson/Orleans.StorageProviderInterceptors/actions)
