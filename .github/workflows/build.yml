@@ -50,7 +50,7 @@ jobs:
       - name: "Publish Artifacts"
         uses: actions/upload-artifact@v3.1.0
         with:
-          name: ${{matrix.os}}
+          name: NuGets
           path: "./Artifacts"
 
   push-github-packages:
@@ -67,7 +67,7 @@ jobs:
       - name: "Download Artifact"
         uses: actions/download-artifact@v3.0.0
         with:
-          name: "windows-latest"
+          name: NuGets
       - name: "Dotnet NuGet Add Source"
         run: dotnet nuget add source https://nuget.pkg.github.com/ElanHasson/index.json --name GitHub --username ElanHasson --password ${{secrets.GH_TOKEN}}
         shell: pwsh
@@ -87,7 +87,7 @@ jobs:
       - name: "Download Artifact"
         uses: actions/download-artifact@v3.0.0
         with:
-          name: "windows-latest"
+          name: NuGets
       - name: "Dotnet NuGet Push"
         run: |
           Get-ChildItem .\ -Filter *.nupkg |
