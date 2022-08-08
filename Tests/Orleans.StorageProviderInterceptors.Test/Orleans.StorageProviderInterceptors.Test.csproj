@@ -4,6 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\stylecop.json" Link="stylecop.json" />
+  </ItemGroup>
+
   <ItemGroup Label="Project References">
     <ProjectReference Include="..\..\Source\Orleans.StorageProviderInterceptors\Orleans.StorageProviderInterceptors.csproj" />
   </ItemGroup>
