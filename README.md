@@ -5,4 +5,4 @@
 [![GitHub Actions Build History](https://buildstats.info/github/chart/ElanHasson/Orleans.StorageProviderInterceptors?branch=main&includeBuildsFromPullRequest=false)](https://github.com/ElanHasson/Orleans.StorageProviderInterceptors/actions)
 
 
-An interceptor library for Orleans Storage Providers allowing to intercept storage provider operations for transparent encryption, model state validation, and even select a different storage provider at runtime..Project Description
+An interceptor library for Orleans Storage Providers allowing interception of grain storage provider operations for transparent encryption, model state validation, or whatever else you can dream up!
