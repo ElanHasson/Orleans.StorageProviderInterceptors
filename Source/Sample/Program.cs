@@ -3,20 +3,20 @@ using Microsoft.Extensions.Hosting;
 using Orleans;
 using Orleans.Hosting;
 using Orleans.Runtime;
-using Orleans.StorageProviderInterceptors;
 using Sample;
+using Tester.StorageFacet.Abstractions;
+using Tester.StorageFacet.Implementations;
 
 // Configure the host
 
 var host = Host.CreateDefaultBuilder()
-    .ConfigureServices(c =>
-    {
-        c.AddSingleton<GrainStorageInterceptorProxy>();
-    })
     .UseOrleans(
         builder => builder
             .UseLocalhostClustering()
-            .AddMemoryGrainStorage("AccountState"))
+            .AddMemoryGrainStorage("Secrets")
+            .UseStorageInterceptor()
+            .UseAsDefaultStorageInterceptor<EncryptedStorageInterceptorFactory>()
+            .UseEncryptedStorageInterceptor("Secrets"))
     .Build();
 
 // Start the host
@@ -29,10 +29,13 @@ var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
 
 // Get a reference to the HelloGrain grain with the key "friend"
 
-var friend = grainFactory.GetGrain<IHelloGrain>("friend");
+var secretStore = grainFactory.GetGrain<ISecretStorageGrain>("friend");
 
 // Call the grain and print the result to the console
-var result = await friend.SayHello("Good morning!");
+await secretStore.AddSecret("Password", "123456789");
+
+var result = await secretStore.GetSecret("Password");
+
 Console.WriteLine("\n\n{0}\n\n", result);
 
 Console.WriteLine("Orleans is running.\nPress Enter to terminate...");
@@ -43,23 +46,23 @@ await host.StopAsync();
 
 namespace Sample
 {
-    internal class HelloGrain : Grain, IHelloGrain
+    internal class SecretStorageGrain : Grain, ISecretStorageGrain
     {
-        public Task<string> SayHello(string greeting) => Task.FromResult($"Hello, {greeting}!");
+        private readonly IPersistentState<Dictionary<string, string>> secrets;
+
+        public SecretStorageGrain([StorageInterceptor("Secrets", "secrets")] IPersistentState<Dictionary<string, string>> state) => this.secrets = state;
+        public async Task AddSecret(string name, string value)
+        {
+            this.secrets.State.Add(name, value);
+            await this.secrets.WriteStateAsync();
+        }
+
+        public Task<string> GetSecret(string name) => Task.FromResult(this.secrets.State[name]);
     }
 
-    internal interface IHelloGrain : IGrainWithStringKey
+    internal interface ISecretStorageGrain : IGrainWithStringKey
     {
-        Task<string> SayHello(string greeting);
-    }
-
-    internal class MyInterceptor : IGrainStorageInterceptor
-    {
-        public ValueTask OnAfterClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState) => throw new NotImplementedException();
-        public ValueTask OnAfterReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState) => throw new NotImplementedException();
-        public ValueTask OnAfterWriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState) => throw new NotImplementedException();
-        public ValueTask OnBeforeClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState) => throw new NotImplementedException();
-        public ValueTask OnBeforeReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState) => throw new NotImplementedException();
-        public ValueTask OnBeforeWriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState) => throw new NotImplementedException();
+        Task AddSecret(string name, string value);
+        Task<string> GetSecret(string name);
     }
 }
