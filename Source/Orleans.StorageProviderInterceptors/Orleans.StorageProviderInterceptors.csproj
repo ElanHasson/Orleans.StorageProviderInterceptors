@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Build">
     <TargetFramework>net6.0</TargetFramework>
@@ -11,11 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="..\..\stylecop.json" Link="stylecop.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.Runtime.Abstractions" Version="3.6.3" />
+    <PackageReference Include="Microsoft.Orleans.Runtime.Abstractions" Version="3.6.5" />
   </ItemGroup>
 
 </Project>
