@@ -10,6 +10,8 @@ using Orleans.Utilities;
 using Tester.StorageFacet.Abstractions;
 using System.Text;
 using System.Collections.Concurrent;
+using Orleans.StorageProviderInterceptors.Abstractions;
+using Orleans.Hosting;
 
 /// <summary>
 /// TODO
@@ -19,7 +21,8 @@ public class NamedStorageInterceptorFactory : INamedStorageInterceptorFactory
     /// <summary>
     /// TODO
     /// </summary>
-    public NamedStorageInterceptorFactory() { }
+    /// <param name="services"></param>
+    public NamedStorageInterceptorFactory(IServiceProvider services) => this.services = services;
 
     /// <summary>
     /// TODO
@@ -30,16 +33,30 @@ public class NamedStorageInterceptorFactory : INamedStorageInterceptorFactory
     /// <exception cref="InvalidOperationException"></exception>
     public IPersistentState<TState> Create<TState>(IGrainActivationContext context, IStorageInterceptorConfig config)
     {
-        var storageProvider = !string.IsNullOrWhiteSpace(config.StorageName)
+        //var factory = string.IsNullOrEmpty(config.StorageName)
+        //           ? this.services.GetService<IStorageInterceptorFactory>()
+        //           : this.services.GetServiceByName<IStorageInterceptorFactory>(config.StorageName);
+        //if (factory is null)
+        //{
+        //    throw new InvalidOperationException($"Interceptor with name {config.StorageName} not found.");
+        //}
+
+        var underlyingStorageProvider = !string.IsNullOrWhiteSpace(config.StorageName)
             ? context.ActivationServices.GetServiceByName<IGrainStorage>(config.StorageName)
             : context.ActivationServices.GetService<IGrainStorage>();
-        if (storageProvider == null)
+        if (underlyingStorageProvider is null)
         {
             ThrowMissingProviderException(context, config);
         }
+        ArgumentNullException.ThrowIfNull(underlyingStorageProvider);
+
         var fullStateName = this.GetFullStateName(context, config);
-        var bridge = new PersistentStateBridge<TState>(fullStateName, context, storageProvider!);
+        var options = this.services.GetRequiredServiceByName<StorageInterceptorOptions<TState>>($"{config.StorageName}-{config.StateName}");
+
+        var bridge = new PersistentStateBridge<TState>(fullStateName, context, underlyingStorageProvider, options);
+
         bridge.Participate(context.ObservableLifecycle);
+
         return bridge;
     }
 
@@ -100,6 +117,7 @@ public class NamedStorageInterceptorFactory : INamedStorageInterceptorFactory
     }
     internal static TypeFormattingOptions Default { get; } = new TypeFormattingOptions();
     private static readonly ConcurrentDictionary<Tuple<Type, TypeFormattingOptions>, string> ParseableNameCache = new();
+    private readonly IServiceProvider services;
 
     internal static string GetParseableName(Type type, TypeFormattingOptions? options = null, Func<Type, string>? getNameFunc = null)
     {
@@ -238,19 +256,28 @@ public class NamedStorageInterceptorFactory : INamedStorageInterceptorFactory
         "abstract" or "add" or "alias" or "as" or "ascending" or "async" or "await" or "base" or "bool" or "break" or "byte" or "case" or "catch" or "char" or "checked" or "class" or "const" or "continue" or "decimal" or "default" or "delegate" or "descending" or "do" or "double" or "dynamic" or "else" or "enum" or "event" or "explicit" or "extern" or "false" or "finally" or "fixed" or "float" or "for" or "foreach" or "from" or "get" or "global" or "goto" or "group" or "if" or "implicit" or "in" or "int" or "interface" or "internal" or "into" or "is" or "join" or "let" or "lock" or "long" or "nameof" or "namespace" or "new" or "null" or "object" or "operator" or "orderby" or "out" or "override" or "params" or "partial" or "private" or "protected" or "public" or "readonly" or "ref" or "remove" or "return" or "sbyte" or "sealed" or "select" or "set" or "short" or "sizeof" or "stackalloc" or "static" or "string" or "struct" or "switch" or "this" or "throw" or "true" or "try" or "typeof" or "uint" or "ulong" or "unchecked" or "unsafe" or "ushort" or "using" or "value" or "var" or "virtual" or "void" or "volatile" or "when" or "where" or "while" or "yield" => true,
         _ => false,
     };
+    /// <inheritdoc/>
+    public IPersistentState<TState> Create<TState>(IGrainActivationContext context, IStorageInterceptorFullConfig<TState> config) => throw new NotImplementedException();
 
     private class PersistentStateBridge<TState> : IPersistentState<TState>, ILifecycleParticipant<IGrainLifecycle>
     {
         private readonly string fullStateName;
         private readonly IGrainActivationContext context;
         private readonly IGrainStorage storageProvider;
+        private readonly StorageInterceptorOptions<TState> options;
         private IStorage<TState> storage = default!;
 
-        public PersistentStateBridge(string fullStateName, IGrainActivationContext context, IGrainStorage storageProvider)
+        public PersistentStateBridge(string fullStateName, IGrainActivationContext context, IGrainStorage storageProvider, StorageInterceptorOptions<TState> options)
         {
+            ArgumentNullException.ThrowIfNull(fullStateName);
+            ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(storageProvider);
+            ArgumentNullException.ThrowIfNull(options);
+
             this.fullStateName = fullStateName;
             this.context = context;
             this.storageProvider = storageProvider;
+            this.options = options;
         }
 
         public TState State
@@ -263,11 +290,35 @@ public class NamedStorageInterceptorFactory : INamedStorageInterceptorFactory
 
         public bool RecordExists => this.storage.RecordExists;
 
-        public Task ClearStateAsync() => this.storage.ClearStateAsync();
+        /// <inheritdoc/>
+        public async Task ClearStateAsync()
+        {
+            if (!await this.options.OnBeforeClearStateAsync(this.context, this))
+            {
+                await this.storage.ClearStateAsync();
+                await this.options.OnAfterClearStateAsync(this.context, this);
+            }
+        }
 
-        public Task ReadStateAsync() => this.storage.ReadStateAsync();
+        /// <inheritdoc/>
+        public async Task WriteStateAsync()
+        {
+            if (!await this.options.OnBeforeWriteStateFunc(this.context, this))
+            {
+                await this.storage.WriteStateAsync();
+                await this.options.OnAfterWriteStateFunc(this.context, this);
+            }
+        }
 
-        public Task WriteStateAsync() => this.storage.WriteStateAsync();
+        /// <inheritdoc/>
+        public async Task ReadStateAsync()
+        {
+            if (!await this.options.OnBeforeReadStateAsync(this.context, this))
+            {
+                await this.storage.ReadStateAsync();
+                await this.options.OnAfterReadStateFunc.Invoke(this.context, this);
+            }
+        }
 
         public void Participate(IGrainLifecycle lifecycle) => lifecycle.Subscribe(this.GetType().FullName, GrainLifecycleStage.SetupState, this.OnSetupState);
 

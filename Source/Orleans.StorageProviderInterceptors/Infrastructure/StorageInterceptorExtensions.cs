@@ -1,6 +1,7 @@
 namespace Orleans.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Runtime;
+using Orleans.StorageProviderInterceptors.Abstractions;
 using Orleans.StorageProviderInterceptors.Infrastructure;
 using Tester.StorageFacet.Abstractions;
 using Tester.StorageFacet.Infrastructure;
@@ -15,13 +16,13 @@ public static class StorageInterceptorExtensions
     /// </summary>
     /// <param name="builder"></param>
     public static ISiloBuilder UseStorageInterceptor(this ISiloBuilder builder) => builder.ConfigureServices(services =>
-                                                                                                                                                                {
-                                                                                                                                                                    // storage feature factory infrastructure
-                                                                                                                                                                    services.AddTransient<INamedStorageInterceptorFactory, NamedStorageInterceptorFactory>();
+{
+    // storage feature factory infrastructure
+    services.AddTransient<INamedStorageInterceptorFactory, NamedStorageInterceptorFactory>();
 
-                                                                                                                                                                    // storage feature facet attribute mapper
-                                                                                                                                                                    services.AddSingleton(typeof(IAttributeToFactoryMapper<StorageInterceptorAttribute>), typeof(StorageInterceptorAttributeMapper));
-                                                                                                                                                                });
+    // storage feature facet attribute mapper
+    services.AddSingleton(typeof(IAttributeToFactoryMapper<StorageInterceptorAttribute>), typeof(StorageInterceptorAttributeMapper));
+});
 
     /// <summary>
     /// TODO

@@ -1,4 +1,8 @@
-﻿namespace Tester.StorageFacet.Abstractions;
+namespace Tester.StorageFacet.Abstractions;
+
+using Orleans.Runtime;
+
+using Orleans.Storage;
 
 /// <summary>
 /// Creates a storage feature from a configuration
@@ -6,10 +10,11 @@
 public interface IStorageInterceptorFactory
 {
     /// <summary>
-    /// 
+    /// Creates a storage feature from a configuration
     /// </summary>
-    /// <typeparam name="TState"></typeparam>
+    /// <param name="context"></param>
     /// <param name="config"></param>
-    /// <returns></returns>
-    IStorageInterceptor<TState> Create<TState>(IStorageInterceptorConfig config);
+    /// <param name="fullStateName"></param>
+    /// <param name="storageProvider"></param>
+    IStorageInterceptor Create(IGrainActivationContext context, IStorageInterceptorConfig config, string fullStateName, IGrainStorage storageProvider);
 }
