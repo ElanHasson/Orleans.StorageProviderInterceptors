@@ -7,12 +7,12 @@ namespace Tester.StorageFacet.Abstractions;
 public interface IStorageInterceptorConfig
 {
     /// <summary>
-    /// 
+    /// The State Name to Intercept.
     /// </summary>
     string StateName { get; }
 
     /// <summary>
-    /// 
+    /// The Storage Provider Name to Intercept.
     /// </summary>
     string StorageName { get; }
 }
