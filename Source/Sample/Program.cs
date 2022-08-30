@@ -24,12 +24,15 @@ var host = Host.CreateDefaultBuilder()
                 c.OnBeforeReadStateAsync = (grainActivationContext, currentState) =>
                 {
                     Console.WriteLine($"OnBeforeReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
-                    return ValueTask.CompletedTask;
+                    return ValueTask.FromResult(true);
                 };
 
                 c.OnAfterReadStateFunc = (grainActivationContext, currentState) =>
                 {
                     Console.WriteLine($"OnAfterReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+
+                    // Do a deep copy
+                    //  Dictionary<string, string>? stateToModify = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(currentState));
 
                     foreach (var (key, value) in currentState.State)
                     {
@@ -51,7 +54,7 @@ var host = Host.CreateDefaultBuilder()
                         // Encrypt the data
                         currentState.State[key] = currentState.State[key].Replace('e', '3');
                     }
-                    return ValueTask.CompletedTask;
+                    return ValueTask.FromResult(true);
                 };
 
                 c.OnAfterWriteStateFunc = (grainActivationContext, currentState) =>
