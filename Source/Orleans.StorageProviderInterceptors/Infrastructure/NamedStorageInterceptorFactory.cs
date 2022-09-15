@@ -259,7 +259,7 @@ public class NamedStorageInterceptorFactory : INamedStorageInterceptorFactory
     /// <inheritdoc/>
     public IPersistentState<TState> Create<TState>(IGrainActivationContext context, IStorageInterceptorFullConfig<TState> config) => throw new NotImplementedException();
 
-    private class PersistentStateBridge<TState> : IPersistentState<TState>, ILifecycleParticipant<IGrainLifecycle>
+    private sealed class PersistentStateBridge<TState> : IPersistentState<TState>, ILifecycleParticipant<IGrainLifecycle>
     {
         private readonly string fullStateName;
         private readonly IGrainActivationContext context;

@@ -63,6 +63,7 @@ end_of_line = lf
 [Makefile]
 indent_style = tab
 
+
 ##########################################
 # Default .NET Code Style Severities
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/configuration-options#scope
@@ -71,6 +72,20 @@ indent_style = tab
 [*.{cs,csx,cake,vb,vbx}]
 # Default Severity for all .NET Code Style rules below
 dotnet_analyzer_diagnostic.severity = warning
+
+# Set severity for all analyzers that are enabled by default (https://docs.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers?view=vs-2022#set-rule-severity-of-multiple-analyzer-rules-at-once-in-an-editorconfig-file)
+dotnet_analyzer_diagnostic.category-roslynator.severity = default
+
+# Enable/disable all analyzers by default.
+# NOTE: This option can be used only in .roslynatorconfig file
+roslynator_analyzers.enabled_by_default = true
+
+# Enable/disable all refactorings
+roslynator_refactorings.enabled = true
+
+# Enable/disable all compiler diagnostic fixes
+roslynator_compiler_diagnostic_fixes.enabled = true
+
 
 ##########################################
 # Language Rules
@@ -188,9 +203,9 @@ dotnet_remove_unnecessary_suppression_exclusions = none:warning
 # C# Unnecessary code rules
 [*.{cs,csx,cake}]
 csharp_style_unused_value_expression_statement_preference = discard_variable:suggestion
-dotnet_diagnostic.IDE0058.severity = suggestion
+dotnet_diagnostic.IDE0058.severity = none
 csharp_style_unused_value_assignment_preference = discard_variable:suggestion
-dotnet_diagnostic.IDE0059.severity = suggestion
+dotnet_diagnostic.IDE0059.severity = error
 
 ##########################################
 # Formatting Rules
@@ -426,15 +441,15 @@ dotnet_naming_rule.parameters_rule.severity = warning
 # Justification: Comments turned off
 # https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA0001.md
 dotnet_diagnostic.SA0001.severity = none
-tab_width = 4
-end_of_line = crlf
+#end_of_line = crlf
+#insert_final_newline = true
 
 [*.cs]
 # SA1515: Single-line comment should be preceded by blank line.
 # Justification: Comments turned off
 # https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1515.md
 dotnet_diagnostic.SA1515.severity = none
-
+dotnet_diagnostic.RS0041.severity = error
 # SA1600: A C# code element is missing a documentation header.
 # Justification: Comments turned off
 # https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1600.md
@@ -481,6 +496,8 @@ csharp_style_unused_value_assignment_preference = discard_variable:suggestion
 csharp_style_unused_value_expression_statement_preference = discard_variable:suggestion
 csharp_indent_labels = no_change
 csharp_space_around_binary_operators = before_and_after
+
+
 
 ##########################################
 # License

@@ -11,40 +11,39 @@ using Tester.StorageFacet.Abstractions;
 // Configure the host
 
 var host = Host.CreateDefaultBuilder()
-    .UseOrleans(
-        builder => builder
-            .UseLocalhostClustering()
-            //Quiet down the silo for the demo.
-            .Configure<StatisticsOptions>(c => c.CollectionLevel = Orleans.Runtime.Configuration.StatisticsLevel.Critical)
-            .ConfigureLogging(c => c.SetMinimumLevel(LogLevel.None))
-            .AddMemoryGrainStorage("SecretsStorage")
-            .UseStorageInterceptor()
-            .UseGenericStorageInterceptor<Dictionary<string, string>>("SecretsStorage", "secretsState", c =>
+    .UseOrleans(builder => builder
+        .UseLocalhostClustering()
+        //Quiet down the silo for the demo.
+        .Configure<StatisticsOptions>(c => c.CollectionLevel = Orleans.Runtime.Configuration.StatisticsLevel.Critical)
+        .ConfigureLogging(c => c.SetMinimumLevel(LogLevel.None))
+        .AddMemoryGrainStorage("SecretsStorage")
+        .UseStorageInterceptor()
+        .UseGenericStorageInterceptor<Dictionary<string, string>>("SecretsStorage", "secretsState", c =>
+        {
+            c.OnBeforeReadStateAsync = (grainActivationContext, currentState) =>
             {
-                c.OnBeforeReadStateAsync = (grainActivationContext, currentState) =>
+                Console.WriteLine($"OnBeforeReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                return ValueTask.FromResult(true);
+            };
+
+            c.OnAfterReadStateFunc = (grainActivationContext, currentState) =>
+            {
+                Console.WriteLine($"OnAfterReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+
+                // Do a deep copy
+                //  Dictionary<string, string>? stateToModify = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(currentState));
+
+                foreach (var (key, value) in currentState.State)
                 {
-                    Console.WriteLine($"OnBeforeReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
-                    return ValueTask.FromResult(true);
-                };
+                    Console.WriteLine($"Intercepted: {key}: {value}");
 
-                c.OnAfterReadStateFunc = (grainActivationContext, currentState) =>
-                {
-                    Console.WriteLine($"OnAfterReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                    // Decrypt the data
+                    currentState.State[key] = currentState.State[key].Replace('3', 'e');
+                }
+                return ValueTask.CompletedTask;
+            };
 
-                    // Do a deep copy
-                    //  Dictionary<string, string>? stateToModify = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(currentState));
-
-                    foreach (var (key, value) in currentState.State)
-                    {
-                        Console.WriteLine($"Intercepted: {key}: {value}");
-
-                        // Decrypt the data
-                        currentState.State[key] = currentState.State[key].Replace('3', 'e');
-                    }
-                    return ValueTask.CompletedTask;
-                };
-
-                c.OnBeforeWriteStateFunc = (grainActivationContext, currentState) =>
+            c.OnBeforeWriteStateFunc = (grainActivationContext, currentState) =>
                 {
                     Console.WriteLine($"OnBeforeWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
                     foreach (var (key, value) in currentState.State)
@@ -57,18 +56,16 @@ var host = Host.CreateDefaultBuilder()
                     return ValueTask.FromResult(true);
                 };
 
-                c.OnAfterWriteStateFunc = (grainActivationContext, currentState) =>
+            c.OnAfterWriteStateFunc = (grainActivationContext, currentState) =>
+            {
+                Console.WriteLine($"OnAfterWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                foreach (var (key, value) in currentState.State)
                 {
-                    Console.WriteLine($"OnAfterWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
-                    foreach (var (key, value) in currentState.State)
-                    {
-                        Console.WriteLine($"What was actually persisted: {key}: {value}");
-
-                    }
-                    return ValueTask.CompletedTask;
-                };
-
-            }))
+                    Console.WriteLine($"What was actually persisted: {key}: {value}");
+                }
+                return ValueTask.CompletedTask;
+            };
+        }))
     .Build();
 
 // Start the host
