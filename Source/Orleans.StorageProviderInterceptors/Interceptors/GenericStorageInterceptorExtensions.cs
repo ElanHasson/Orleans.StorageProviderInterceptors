@@ -14,7 +14,7 @@ public static class GenericStorageInterceptorExtensions
     /// <param name="storageName"></param>
     /// <param name="stateName"></param>
     /// <param name="options"></param>
-    public static void UseGenericStorageInterceptor<TState>(this ISiloBuilder builder, string storageName, string stateName, Action<StorageInterceptorOptions<TState>> options) => builder.ConfigureServices(services =>
+    public static ISiloBuilder UseGenericStorageInterceptor<TState>(this ISiloBuilder builder, string storageName, string stateName, Action<StorageInterceptorOptions<TState>> options) => builder.ConfigureServices(services =>
     {
         var opts = new StorageInterceptorOptions<TState>();
         options.Invoke(opts);
