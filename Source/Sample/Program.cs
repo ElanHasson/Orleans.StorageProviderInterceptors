@@ -5,8 +5,8 @@ using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Runtime;
+using Orleans.StorageProviderInterceptors.Abstractions;
 using Sample;
-using Tester.StorageFacet.Abstractions;
 
 // Configure the host
 
@@ -17,7 +17,7 @@ var host = Host.CreateDefaultBuilder()
         .Configure<StatisticsOptions>(c => c.CollectionLevel = Orleans.Runtime.Configuration.StatisticsLevel.Critical)
         .ConfigureLogging(c => c.SetMinimumLevel(LogLevel.None))
         .AddMemoryGrainStorage("SecretsStorage")
-        .UseStorageInterceptor()
+        .AddStorageInterceptors()
         .UseGenericStorageInterceptor<Dictionary<string, string>>("SecretsStorage", "secretsState", c =>
         {
             c.OnBeforeReadStateAsync = (grainActivationContext, currentState) =>

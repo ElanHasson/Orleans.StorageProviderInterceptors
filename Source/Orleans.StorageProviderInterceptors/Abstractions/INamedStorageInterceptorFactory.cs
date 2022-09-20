@@ -1,5 +1,4 @@
 namespace Orleans.StorageProviderInterceptors.Abstractions;
-using Tester.StorageFacet.Abstractions;
 
 using Orleans.Runtime;
 

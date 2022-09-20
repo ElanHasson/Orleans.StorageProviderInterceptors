@@ -3,8 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Orleans.Runtime;
 using Orleans.StorageProviderInterceptors.Abstractions;
 using Orleans.StorageProviderInterceptors.Infrastructure;
-using Tester.StorageFacet.Abstractions;
-using Tester.StorageFacet.Infrastructure;
 
 /// <summary>
 /// TODO
@@ -15,7 +13,7 @@ public static class StorageInterceptorExtensions
     /// TODO
     /// </summary>
     /// <param name="builder"></param>
-    public static ISiloBuilder UseStorageInterceptor(this ISiloBuilder builder) => builder.ConfigureServices(services =>
+    public static ISiloBuilder AddStorageInterceptors(this ISiloBuilder builder) => builder.ConfigureServices(services =>
 {
     // storage feature factory infrastructure
     services.AddTransient<INamedStorageInterceptorFactory, NamedStorageInterceptorFactory>();
