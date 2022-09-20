@@ -7,10 +7,9 @@ using Orleans;
 using Orleans.Runtime;
 using Orleans.Storage;
 using Orleans.Utilities;
-using Tester.StorageFacet.Abstractions;
+using Orleans.StorageProviderInterceptors.Abstractions;
 using System.Text;
 using System.Collections.Concurrent;
-using Orleans.StorageProviderInterceptors.Abstractions;
 using Orleans.Hosting;
 
 /// <summary>

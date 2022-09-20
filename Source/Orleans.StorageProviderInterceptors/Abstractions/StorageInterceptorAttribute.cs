@@ -1,4 +1,4 @@
-namespace Tester.StorageFacet.Abstractions;
+namespace Orleans.StorageProviderInterceptors.Abstractions;
 using System;
 using Orleans;
 
