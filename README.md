@@ -6,3 +6,8 @@
 
 
 An interceptor library for Orleans Storage Providers allowing interception of grain storage provider operations for transparent encryption, model state validation, or whatever else you can dream up!
+
+
+The current interceptor implementation requires using `StorageInterceptor` instead of Orleans' `PersistentState` attribute on injected grain states.
+
+Check out the sample app: https://github.com/ElanHasson/Orleans.StorageProviderInterceptors/blob/main/Source/Sample/
