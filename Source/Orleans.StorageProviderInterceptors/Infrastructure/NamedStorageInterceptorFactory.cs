@@ -292,30 +292,33 @@ public class NamedStorageInterceptorFactory : INamedStorageInterceptorFactory
         /// <inheritdoc/>
         public async Task ClearStateAsync()
         {
-            if (!await this.options.OnBeforeClearStateAsync(this.context, this))
+            var (preventOperation, state) = await this.options.OnBeforeClearStateAsync(this.context, this);
+            if (!preventOperation)
             {
                 await this.storage.ClearStateAsync();
-                await this.options.OnAfterClearStateAsync(this.context, this);
+                await this.options.OnAfterClearStateAsync(this.context, this, state);
             }
         }
 
         /// <inheritdoc/>
         public async Task WriteStateAsync()
         {
-            if (!await this.options.OnBeforeWriteStateFunc(this.context, this))
+            var (preventOperation, state) = await this.options.OnBeforeWriteStateFunc(this.context, this);
+            if (!preventOperation)
             {
                 await this.storage.WriteStateAsync();
-                await this.options.OnAfterWriteStateFunc(this.context, this);
+                await this.options.OnAfterWriteStateFunc(this.context, this, state);
             }
         }
 
         /// <inheritdoc/>
         public async Task ReadStateAsync()
         {
-            if (!await this.options.OnBeforeReadStateAsync(this.context, this))
+            var (preventOperation, state) = await this.options.OnBeforeReadStateAsync(this.context, this);
+            if (!preventOperation)
             {
                 await this.storage.ReadStateAsync();
-                await this.options.OnAfterReadStateFunc.Invoke(this.context, this);
+                await this.options.OnAfterReadStateFunc.Invoke(this.context, this, state);
             }
         }
 
