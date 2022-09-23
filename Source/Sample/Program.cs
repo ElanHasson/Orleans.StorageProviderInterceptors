@@ -47,7 +47,7 @@ var host = Host.CreateDefaultBuilder()
                     Console.WriteLine($"What was actually persisted: {key}: {value}");
 
                     currentState.State[key] = unencryptedValues[key];
-                    Console.WriteLine($"What will be returned to grain: {key}: {value}");
+                    Console.WriteLine($"What will be returned to grain: {key}: {unencryptedValues[key]}");
                 }
                 return ValueTask.CompletedTask;
             };
@@ -104,12 +104,16 @@ var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
 var secretStore = grainFactory.GetGrain<ISecretStorageGrain>("friend");
 
 // Call the grain and print the result to the console
-await secretStore.AddSecret("Password", "Now you See the secrets and now they are seen as safe!");
+await secretStore.AddOrUpdateSecret("Password", "Now you See the secrets and now they are seen as safe!");
 
 var result = await secretStore.GetSecret("Password");
 
-Console.WriteLine("\n\n{0}\n\n", result);
+Console.WriteLine($"Original Value: {result}");
 
+await secretStore.AddOrUpdateSecret("Password", "Seeeeeeeeeecrets");
+result = await secretStore.GetSecret("Password");
+
+Console.WriteLine($"Updated Value: {result}");
 Console.ReadLine();
 
 await host.StopAsync();
@@ -121,18 +125,19 @@ namespace Sample
         private readonly IPersistentState<Dictionary<string, string>> secrets;
 
         public SecretStorageGrain([StorageInterceptor("SecretsStorage", "secretsState")] IPersistentState<Dictionary<string, string>> state) => this.secrets = state;
-        public async Task AddSecret(string name, string value)
+        public async Task AddOrUpdateSecret(string name, string value)
         {
-            this.secrets.State.Add(name, value);
+            this.secrets.State[name] = value;
             await this.secrets.WriteStateAsync();
         }
+
 
         public Task<string> GetSecret(string name) => Task.FromResult(this.secrets.State[name]);
     }
 
     internal interface ISecretStorageGrain : IGrainWithStringKey
     {
-        Task AddSecret(string name, string value);
+        Task AddOrUpdateSecret(string name, string value);
         Task<string> GetSecret(string name);
     }
 }
