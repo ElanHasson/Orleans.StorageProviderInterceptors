@@ -20,22 +20,67 @@ var host = Host.CreateDefaultBuilder()
         .AddStorageInterceptors()
         .UseGenericStorageInterceptor<Dictionary<string, string>>("SecretsStorage", "secretsState", c =>
         {
+
+            c.OnBeforeWriteStateFunc = (grainActivationContext, currentState) =>
+                {
+                    var unencryptedValues = new Dictionary<string, string>(currentState.State.Count);
+                    Console.WriteLine($"OnBeforeWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                    foreach (var (key, value) in currentState.State)
+                    {
+                        Console.WriteLine($"Intercepted: {key}: {value}");
+
+                        // Save the original state to return to the grain
+                        unencryptedValues.Add(key, value);
+
+                        // Encrypt the data
+                        currentState.State[key] = currentState.State[key].Replace('e', '3');
+                    }
+                    return ValueTask.FromResult((false, (object?)unencryptedValues));
+                };
+
+            c.OnAfterWriteStateFunc = (grainActivationContext, currentState, sharedState) =>
+            {
+                var unencryptedValues = (Dictionary<string, string>)sharedState!;
+                Console.WriteLine($"OnAfterWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                foreach (var (key, value) in currentState.State)
+                {
+                    Console.WriteLine($"What was actually persisted: {key}: {value}");
+
+                    currentState.State[key] = unencryptedValues[key];
+                    Console.WriteLine($"What will be returned to grain: {key}: {value}");
+                }
+                return ValueTask.CompletedTask;
+            };
+
             c.OnBeforeReadStateAsync = (grainActivationContext, currentState) =>
             {
                 Console.WriteLine($"OnBeforeReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
-                return ValueTask.FromResult(true);
+
+                var unencryptedValues = new Dictionary<string, string>(currentState.State.Count);
+                foreach (var (key, value) in currentState.State)
+                {
+                    Console.WriteLine($"Unencrypted Values: {key}: {value}");
+
+                    // Save the original state to return to the grain
+                    unencryptedValues.Add(key, value);
+                }
+                return ValueTask.FromResult((false, (object?)unencryptedValues));
             };
 
-            c.OnAfterReadStateFunc = (grainActivationContext, currentState) =>
+            c.OnAfterReadStateFunc = (grainActivationContext, currentState, sharedState) =>
             {
-                Console.WriteLine($"OnAfterReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                var unencryptedValues = (Dictionary<string, string>)sharedState!;
+                if (!currentState.RecordExists)
+                {
+                    return ValueTask.CompletedTask;
+                }
 
-                // Do a deep copy
-                //  Dictionary<string, string>? stateToModify = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(currentState));
+                var list = sharedState as List<string>;
+                Console.WriteLine($"OnAfterReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
 
                 foreach (var (key, value) in currentState.State)
                 {
-                    Console.WriteLine($"Intercepted: {key}: {value}");
+                    Console.WriteLine($"Encrypted Values: {key}: {value}");
 
                     // Decrypt the data
                     currentState.State[key] = currentState.State[key].Replace('3', 'e');
@@ -43,28 +88,6 @@ var host = Host.CreateDefaultBuilder()
                 return ValueTask.CompletedTask;
             };
 
-            c.OnBeforeWriteStateFunc = (grainActivationContext, currentState) =>
-                {
-                    Console.WriteLine($"OnBeforeWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
-                    foreach (var (key, value) in currentState.State)
-                    {
-                        Console.WriteLine($"Intercepted: {key}: {value}");
-
-                        // Encrypt the data
-                        currentState.State[key] = currentState.State[key].Replace('e', '3');
-                    }
-                    return ValueTask.FromResult(true);
-                };
-
-            c.OnAfterWriteStateFunc = (grainActivationContext, currentState) =>
-            {
-                Console.WriteLine($"OnAfterWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
-                foreach (var (key, value) in currentState.State)
-                {
-                    Console.WriteLine($"What was actually persisted: {key}: {value}");
-                }
-                return ValueTask.CompletedTask;
-            };
         }))
     .Build();
 
