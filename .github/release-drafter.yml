@@ -9,6 +9,9 @@ tag-template: "$RESOLVED_VERSION"
 change-template: "- $TITLE by @$AUTHOR (#$NUMBER)"
 no-changes-template: "- No changes"
 categories:
+  - title: "📦 Dependencies"
+    labels:
+      - "dependencies"
   - title: "📚 Documentation"
     labels:
       - "documentation"
