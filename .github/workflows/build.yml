@@ -65,7 +65,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v3.0.2
         with:
           name: NuGets
       - name: "Dotnet NuGet Add Source"
@@ -85,7 +85,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v3.0.2
         with:
           name: NuGets
       - name: "Dotnet NuGet Push"
