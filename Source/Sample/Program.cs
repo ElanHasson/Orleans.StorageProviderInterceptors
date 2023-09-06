@@ -1,9 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Hosting;
 using Orleans.Runtime;
 using Orleans.StorageProviderInterceptors.Abstractions;
 using Sample;
@@ -13,8 +10,6 @@ using Sample;
 var host = Host.CreateDefaultBuilder()
     .UseOrleans(builder => builder
         .UseLocalhostClustering()
-        //Quiet down the silo for the demo.
-        .Configure<StatisticsOptions>(c => c.CollectionLevel = Orleans.Runtime.Configuration.StatisticsLevel.Critical)
         .ConfigureLogging(c => c.SetMinimumLevel(LogLevel.None))
         .AddMemoryGrainStorage("SecretsStorage")
         .AddStorageInterceptors()
@@ -24,7 +19,7 @@ var host = Host.CreateDefaultBuilder()
             c.OnBeforeWriteStateFunc = (grainActivationContext, currentState) =>
                 {
                     var unencryptedValues = new Dictionary<string, string>(currentState.State.Count);
-                    Console.WriteLine($"OnBeforeWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                    Console.WriteLine($"OnBeforeWriteState: {grainActivationContext}: Count Is {currentState.State.Count}");
                     foreach (var (key, value) in currentState.State)
                     {
                         Console.WriteLine($"Intercepted: {key}: {value}");
@@ -41,7 +36,7 @@ var host = Host.CreateDefaultBuilder()
             c.OnAfterWriteStateFunc = (grainActivationContext, currentState, sharedState) =>
             {
                 var unencryptedValues = (Dictionary<string, string>)sharedState!;
-                Console.WriteLine($"OnAfterWriteState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                Console.WriteLine($"OnAfterWriteState: {grainActivationContext}: Count Is {currentState.State.Count}");
                 foreach (var (key, value) in currentState.State)
                 {
                     Console.WriteLine($"What was actually persisted: {key}: {value}");
@@ -54,7 +49,7 @@ var host = Host.CreateDefaultBuilder()
 
             c.OnBeforeReadStateAsync = (grainActivationContext, currentState) =>
             {
-                Console.WriteLine($"OnBeforeReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                Console.WriteLine($"OnBeforeReadState: {grainActivationContext}: Count Is {currentState.State.Count}");
 
                 var unencryptedValues = new Dictionary<string, string>(currentState.State.Count);
                 foreach (var (key, value) in currentState.State)
@@ -76,7 +71,7 @@ var host = Host.CreateDefaultBuilder()
                 }
 
                 var list = sharedState as List<string>;
-                Console.WriteLine($"OnAfterReadState: {grainActivationContext.GrainIdentity.IdentityString}: Count Is {currentState.State.Count}");
+                Console.WriteLine($"OnAfterReadState: {grainActivationContext}: Count Is {currentState.State.Count}");
 
                 foreach (var (key, value) in currentState.State)
                 {
@@ -120,7 +115,7 @@ await host.StopAsync();
 
 namespace Sample
 {
-    internal class SecretStorageGrain : Grain, ISecretStorageGrain
+    internal sealed class SecretStorageGrain : Grain, ISecretStorageGrain
     {
         private readonly IPersistentState<Dictionary<string, string>> secrets;
 

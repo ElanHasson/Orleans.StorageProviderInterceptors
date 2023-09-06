@@ -17,7 +17,7 @@ public class StorageInterceptorAttributeMapper : IAttributeToFactoryMapper<Stora
     /// </summary>
     /// <param name="parameter"></param>
     /// <param name="metadata"></param>
-    public Factory<IGrainActivationContext, object> GetFactory(ParameterInfo parameter, StorageInterceptorAttribute metadata)
+    public Factory<IGrainContext, object> GetFactory(ParameterInfo parameter, StorageInterceptorAttribute metadata)
     {
         ArgumentNullException.ThrowIfNull(parameter);
         IStorageInterceptorConfig config = metadata;
@@ -30,7 +30,7 @@ public class StorageInterceptorAttributeMapper : IAttributeToFactoryMapper<Stora
         return context => Create(context, genericCreate, config);
     }
 
-    private static object Create(IGrainActivationContext context, MethodInfo genericCreate, IStorageInterceptorConfig config)
+    private static object Create(IGrainContext context, MethodInfo genericCreate, IStorageInterceptorConfig config)
     {
         var factory = context.ActivationServices.GetRequiredService<INamedStorageInterceptorFactory>();
         var args = new object[] { context, config };

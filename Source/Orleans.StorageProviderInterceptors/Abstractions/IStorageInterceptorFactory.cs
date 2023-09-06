@@ -16,5 +16,5 @@ public interface IStorageInterceptorFactory
     /// <param name="config"></param>
     /// <param name="fullStateName"></param>
     /// <param name="storageProvider"></param>
-    IStorageInterceptor Create(IGrainActivationContext context, IStorageInterceptorConfig config, string fullStateName, IGrainStorage storageProvider);
+    IStorageInterceptor Create(IGrainContext context, IStorageInterceptorConfig config, string fullStateName, IGrainStorage storageProvider);
 }

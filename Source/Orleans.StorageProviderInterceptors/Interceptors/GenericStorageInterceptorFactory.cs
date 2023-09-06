@@ -10,14 +10,14 @@
 ///// </summary>
 //public class GenericStorageInterceptorFactory : IStorageInterceptorFactory
 //{
-//    private readonly IGrainActivationContext context;
+//    private readonly IGrainContext context;
 //    /// <summary>
 //    /// TODO
 //    /// </summary>
 //    /// <param name="context"></param>
-//    public GenericStorageInterceptorFactory(IGrainActivationContext context) => this.context = context;
+//    public GenericStorageInterceptorFactory(IGrainContext context) => this.context = context;
 //    /// <inheritdoc/>
-//    public IStorageInterceptor Create<TState>(IGrainActivationContext context, IStorageInterceptorConfig config, string fullStateName, IGrainStorage storageProvider)
+//    public IStorageInterceptor Create<TState>(IGrainContext context, IStorageInterceptorConfig config, string fullStateName, IGrainStorage storageProvider)
 //    {
 //        var storage = this.context.ActivationServices.GetRequiredService<GenericStorageInterceptor<TState>>();
 //        var options = this.context.ActivationServices.GetRequiredServiceByName<StorageInterceptorOptions<TState>>(config.StorageName);
