@@ -29,7 +29,7 @@ public interface IStorageInterceptorFullConfig<TState> : IStorageInterceptorConf
     /// <summary>
     /// .
     /// </summary>
-    IGrainActivationContext Context { get; set; }
+    IGrainContext Context { get; set; }
     /// <summary>
     /// .
     /// </summary>
@@ -58,7 +58,7 @@ public class StorageInterceptorFullConfig<TState> : IStorageInterceptorFullConfi
     /// <summary>
     /// .
     /// </summary>
-    public IGrainActivationContext Context { get; set; } = default!;
+    public IGrainContext Context { get; set; } = default!;
     /// <summary>
     /// .
     /// </summary>

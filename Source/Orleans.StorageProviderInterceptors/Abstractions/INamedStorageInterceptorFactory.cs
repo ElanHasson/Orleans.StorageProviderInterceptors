@@ -13,5 +13,5 @@ public interface INamedStorageInterceptorFactory
     /// <typeparam name="TState"></typeparam>
     /// <param name="context"></param>
     /// <param name="config"></param>
-    IPersistentState<TState> Create<TState>(IGrainActivationContext context, IStorageInterceptorConfig config);
+    IPersistentState<TState> Create<TState>(IGrainContext context, IStorageInterceptorConfig config);
 }
