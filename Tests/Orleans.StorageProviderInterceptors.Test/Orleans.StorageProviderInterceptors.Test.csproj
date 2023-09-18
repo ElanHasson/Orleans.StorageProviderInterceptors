@@ -4,6 +4,11 @@
     <TargetFramework>net7.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;NU5105;1591</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
   
   <ItemGroup Label="Project References">
     <ProjectReference Include="..\..\Source\Orleans.StorageProviderInterceptors\Orleans.StorageProviderInterceptors.csproj" />
@@ -27,6 +32,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="7.2.1" />
+    <PackageReference Include="OrleansTestKit" Version="4.0.0-beta.3" />
   </ItemGroup>
 
 </Project>
