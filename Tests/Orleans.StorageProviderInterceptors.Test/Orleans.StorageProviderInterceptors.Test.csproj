@@ -22,7 +22,7 @@
     <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30" />
     <PackageReference Update="MinVer" Version="4.3.0" />
     <PackageReference Update="Moq" Version="4.20.69" />
-    <PackageReference Update="xunit" Version="2.5.0" />
+    <PackageReference Update="xunit" Version="2.5.2" />
     <PackageReference Update="xunit.runner.visualstudio" Version="2.5.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
