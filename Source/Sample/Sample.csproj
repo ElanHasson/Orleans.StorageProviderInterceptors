@@ -14,7 +14,7 @@
 
     <PackageReference Include="Microsoft.Orleans.Core" Version="7.2.1" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="7.2.1" />
-    <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.2.1" >
+    <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.2.3" >
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
