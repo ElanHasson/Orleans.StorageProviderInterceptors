@@ -29,7 +29,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30" />
+    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14" />
     <PackageReference Update="MinVer" Version="4.3.0" />
   </ItemGroup>
 </Project>
